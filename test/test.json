@@ -1,0 +1,463 @@
+[
+    {
+        "ShopifyProductId": "123",
+        "ShopifyVariantId": "456",
+        "stock": [
+            {
+                "inventoryItemId": "789",
+                "locationId": "101",
+                "available": 5,
+                "updatedAt": "2023-04-01T00:00:00Z"
+            },{
+                "inventoryItemId": "789",
+                "locationId": "101",
+                "available": 5,
+                "updatedAt": "2023-04-01T00:00:00Z"
+            }
+        ]
+    },
+    {
+        "ShopifyProductId": "124333",
+        "ShopifyVariantId": "457",
+        "stock": [
+            {
+                "inventoryItemId": "790",
+                "locationId": "102",
+                "available": 6,
+                "updatedAt": "2023-04-02T00:00:00Z"
+            }
+        ]
+    },
+    {
+        "ShopifyProductId": "125111",
+        "ShopifyVariantId": "458",
+        "stock": [
+            {
+                "inventoryItemId": "791",
+                "locationId": "103",
+                "available": 7,
+                "updatedAt": "2023-04-03T00:00:00Z"
+            }
+        ]
+    },
+    {
+        "ShopifyProductId": "125232",
+        "ShopifyVariantId": "458",
+        "stock": [
+            {
+                "inventoryItemId": "791",
+                "locationId": "103",
+                "available": 7,
+                "updatedAt": "2023-04-03T00:00:00Z"
+            }
+        ]
+    },{
+        "ShopifyProductId": "12542325",
+        "ShopifyVariantId": "458",
+        "stock": [
+            {
+                "inventoryItemId": "791",
+                "locationId": "103",
+                "available": 7,
+                "updatedAt": "2023-04-03T00:00:00Z"
+            }
+        ]
+    },{
+        "ShopifyProductId": "125",
+        "ShopifyVariantId": "458",
+        "stock": [
+            {
+                "inventoryItemId": "791",
+                "locationId": "103",
+                "available": 7,
+                "updatedAt": "2023-04-03T00:00:00Z"
+            }
+        ]
+    },{
+        "ShopifyProductId": "12545",
+        "ShopifyVariantId": "458",
+        "stock": [
+            {
+                "inventoryItemId": "791",
+                "locationId": "103",
+                "available": 7,
+                "updatedAt": "2023-04-03T00:00:00Z"
+            }
+        ]
+    },{
+        "ShopifyProductId": "12534",
+        "ShopifyVariantId": "458",
+        "stock": [
+            {
+                "inventoryItemId": "791",
+                "locationId": "103",
+                "available": 7,
+                "updatedAt": "2023-04-03T00:00:00Z"
+            }
+        ]
+    },{
+        "ShopifyProductId": "125342",
+        "ShopifyVariantId": "458",
+        "stock": [
+            {
+                "inventoryItemId": "791",
+                "locationId": "103",
+                "available": 7,
+                "updatedAt": "2023-04-03T00:00:00Z"
+            }
+        ]
+    },{
+        "ShopifyProductId": "12543545456",
+        "ShopifyVariantId": "458",
+        "stock": [
+            {
+                "inventoryItemId": "791",
+                "locationId": "103",
+                "available": 7,
+                "updatedAt": "2023-04-03T00:00:00Z"
+            }
+        ]
+    }, {
+        "ShopifyProductId": "1223",
+        "ShopifyVariantId": "456",
+        "stock": [
+            {
+                "inventoryItemId": "789",
+                "locationId": "101",
+                "available": 5,
+                "updatedAt": "2023-04-01T00:00:00Z"
+            }
+        ]
+    },
+    {
+        "ShopifyProductId": "1243345343",
+        "ShopifyVariantId": "457",
+        "stock": [
+            {
+                "inventoryItemId": "790",
+                "locationId": "102",
+                "available": 6,
+                "updatedAt": "2023-04-02T00:00:00Z"
+            }
+        ]
+    },
+    {
+        "ShopifyProductId": "12556561611",
+        "ShopifyVariantId": "458",
+        "stock": [
+            {
+                "inventoryItemId": "791",
+                "locationId": "103",
+                "available": 7,
+                "updatedAt": "2023-04-03T00:00:00Z"
+            }
+        ]
+    },
+    {
+        "ShopifyProductId": "125235652",
+        "ShopifyVariantId": "458",
+        "stock": [
+            {
+                "inventoryItemId": "791",
+                "locationId": "103",
+                "available": 7,
+                "updatedAt": "2023-04-03T00:00:00Z"
+            }
+        ]
+    },{
+        "ShopifyProductId": "1254232774465",
+        "ShopifyVariantId": "458",
+        "stock": [
+            {
+                "inventoryItemId": "791",
+                "locationId": "103",
+                "available": 7,
+                "updatedAt": "2023-04-03T00:00:00Z"
+            }
+        ]
+    },{
+        "ShopifyProductId": "1266599",
+        "ShopifyVariantId": "458",
+        "stock": [
+            {
+                "inventoryItemId": "791",
+                "locationId": "103",
+                "available": 7,
+                "updatedAt": "2023-04-03T00:00:00Z"
+            }
+        ]
+    },{
+        "ShopifyProductId": "125434599",
+        "ShopifyVariantId": "458",
+        "stock": [
+            {
+                "inventoryItemId": "791",
+                "locationId": "103",
+                "available": 7,
+                "updatedAt": "2023-04-03T00:00:00Z"
+            }
+        ]
+    },{
+        "ShopifyProductId": "12453478",
+        "ShopifyVariantId": "458",
+        "stock": [
+            {
+                "inventoryItemId": "791",
+                "locationId": "103",
+                "available": 7,
+                "updatedAt": "2023-04-03T00:00:00Z"
+            }
+        ]
+    },{
+        "ShopifyProductId": "125344562",
+        "ShopifyVariantId": "458",
+        "stock": [
+            {
+                "inventoryItemId": "791",
+                "locationId": "103",
+                "available": 7,
+                "updatedAt": "2023-04-03T00:00:00Z"
+            }
+        ]
+    },{
+        "ShopifyProductId": "12543354235456",
+        "ShopifyVariantId": "458",
+        "stock": [
+            {
+                "inventoryItemId": "791",
+                "locationId": "103",
+                "available": 7,
+                "updatedAt": "2023-04-03T00:00:00Z"
+            }
+        ]
+    },
+    {
+        "ShopifyProductId": "1223234233",
+        "ShopifyVariantId": "456",
+        "stock": [
+            {
+                "inventoryItemId": "789",
+                "locationId": "101",
+                "available": 5,
+                "updatedAt": "2023-04-01T00:00:00Z"
+            }
+        ]
+    },
+    {
+        "ShopifyProductId": "1243339777",
+        "ShopifyVariantId": "457",
+        "stock": [
+            {
+                "inventoryItemId": "790",
+                "locationId": "102",
+                "available": 6,
+                "updatedAt": "2023-04-02T00:00:00Z"
+            }
+        ]
+    },
+    {
+        "ShopifyProductId": "1251177971",
+        "ShopifyVariantId": "458",
+        "stock": [
+            {
+                "inventoryItemId": "791",
+                "locationId": "103",
+                "available": 7,
+                "updatedAt": "2023-04-03T00:00:00Z"
+            }
+        ]
+    },
+    {
+        "ShopifyProductId": "12527777332",
+        "ShopifyVariantId": "458",
+        "stock": [
+            {
+                "inventoryItemId": "791",
+                "locationId": "103",
+                "available": 7,
+                "updatedAt": "2023-04-03T00:00:00Z"
+            }
+        ]
+    },{
+        "ShopifyProductId": "1254232566115",
+        "ShopifyVariantId": "458",
+        "stock": [
+            {
+                "inventoryItemId": "791",
+                "locationId": "103",
+                "available": 7,
+                "updatedAt": "2023-04-03T00:00:00Z"
+            }
+        ]
+    },{
+        "ShopifyProductId": "1255500005",
+        "ShopifyVariantId": "458",
+        "stock": [
+            {
+                "inventoryItemId": "791",
+                "locationId": "103",
+                "available": 7,
+                "updatedAt": "2023-04-03T00:00:00Z"
+            }
+        ]
+    },{
+        "ShopifyProductId": "12555599945",
+        "ShopifyVariantId": "458",
+        "stock": [
+            {
+                "inventoryItemId": "791",
+                "locationId": "103",
+                "available": 7,
+                "updatedAt": "2023-04-03T00:00:00Z"
+            }
+        ]
+    },{
+        "ShopifyProductId": "1253338834",
+        "ShopifyVariantId": "458",
+        "stock": [
+            {
+                "inventoryItemId": "791",
+                "locationId": "103",
+                "available": 7,
+                "updatedAt": "2023-04-03T00:00:00Z"
+            }
+        ]
+    },{
+        "ShopifyProductId": "12544377742",
+        "ShopifyVariantId": "458",
+        "stock": [
+            {
+                "inventoryItemId": "791",
+                "locationId": "103",
+                "available": 7,
+                "updatedAt": "2023-04-03T00:00:00Z"
+            }
+        ]
+    },{
+        "ShopifyProductId": "125435166145456",
+        "ShopifyVariantId": "458",
+        "stock": [
+            {
+                "inventoryItemId": "791",
+                "locationId": "103",
+                "available": 7,
+                "updatedAt": "2023-04-03T00:00:00Z"
+            }
+        ]
+    },
+    {
+        "ShopifyProductId": "12334345454",
+        "ShopifyVariantId": "456",
+        "stock": [
+            {
+                "inventoryItemId": "789",
+                "locationId": "101",
+                "available": 5,
+                "updatedAt": "2023-04-01T00:00:00Z"
+            }
+        ]
+    },
+    {
+        "ShopifyProductId": "124333433",
+        "ShopifyVariantId": "457",
+        "stock": [
+            {
+                "inventoryItemId": "790",
+                "locationId": "102",
+                "available": 6,
+                "updatedAt": "2023-04-02T00:00:00Z"
+            }
+        ]
+    },
+    {
+        "ShopifyProductId": "1253434111",
+        "ShopifyVariantId": "458",
+        "stock": [
+            {
+                "inventoryItemId": "791",
+                "locationId": "103",
+                "available": 7,
+                "updatedAt": "2023-04-03T00:00:00Z"
+            }
+        ]
+    },
+    {
+        "ShopifyProductId": "12523275434",
+        "ShopifyVariantId": "458",
+        "stock": [
+            {
+                "inventoryItemId": "791",
+                "locationId": "103",
+                "available": 7,
+                "updatedAt": "2023-04-03T00:00:00Z"
+            }
+        ]
+    },{
+        "ShopifyProductId": "125466742325",
+        "ShopifyVariantId": "458",
+        "stock": [
+            {
+                "inventoryItemId": "791",
+                "locationId": "103",
+                "available": 7,
+                "updatedAt": "2023-04-03T00:00:00Z"
+            }
+        ]
+    },{
+        "ShopifyProductId": "1253232",
+        "ShopifyVariantId": "458",
+        "stock": [
+            {
+                "inventoryItemId": "791",
+                "locationId": "103",
+                "available": 7,
+                "updatedAt": "2023-04-03T00:00:00Z"
+            }
+        ]
+    },{
+        "ShopifyProductId": "125111245",
+        "ShopifyVariantId": "458",
+        "stock": [
+            {
+                "inventoryItemId": "791",
+                "locationId": "103",
+                "available": 7,
+                "updatedAt": "2023-04-03T00:00:00Z"
+            }
+        ]
+    },{
+        "ShopifyProductId": "123434534",
+        "ShopifyVariantId": "458",
+        "stock": [
+            {
+                "inventoryItemId": "791",
+                "locationId": "103",
+                "available": 7,
+                "updatedAt": "2023-04-03T00:00:00Z"
+            }
+        ]
+    },{
+        "ShopifyProductId": "125343wcsd442",
+        "ShopifyVariantId": "458",
+        "stock": [
+            {
+                "inventoryItemId": "791",
+                "locationId": "103",
+                "available": 7,
+                "updatedAt": "2023-04-03T00:00:00Z"
+            }
+        ]
+    },{
+        "ShopifyProductId": "12543523245456",
+        "ShopifyVariantId": "458",
+        "stock": [
+            {
+                "inventoryItemId": "791",
+                "locationId": "103",
+                "available": 7,
+                "updatedAt": "2023-04-03T00:00:00Z"
+            }
+        ]
+    }
+
+]
