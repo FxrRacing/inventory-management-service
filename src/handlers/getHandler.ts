@@ -1,6 +1,6 @@
 
-import {Env } from "../index";
+import {Env } from "../interfaces";
 
-async function getHandler(request: Request, env: Env): Promise<Response> {
+export async function getHandler(request: Request, env: Env): Promise<Response> {
     return new Response('Received a GET request');
 }

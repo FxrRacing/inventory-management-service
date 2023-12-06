@@ -7,33 +7,27 @@ export interface Product {
         available: number;
         updatedAt: string;
     }>;
-}
-
-
-export class ProductPrototype implements Product {
-    ShopifyProductId: string;
-    ShopifyVariantId: string;
-    stock: Array<{
+    clone: (ShopifyProductId: string, ShopifyVariantId: string, stock: Array<{
         inventoryItemId: string;
         locationId: string;
         available: number;
         updatedAt: string;
-    }>;
-    constructor(
-        ShopifyProductId: string,
-        ShopifyVariantId: string,
-        stock: Array<{
-            inventoryItemId: string;
-            locationId: string;
-            available: number;
-            updatedAt: string;
-        }>
-    ) {
-        this.ShopifyProductId = ShopifyProductId;
-        this.ShopifyVariantId = ShopifyVariantId;
-        this.stock = stock;
-    }
+    }>) => Product;
 }
+
+
+export const productPrototype: Product = {
+    ShopifyProductId: '',
+    ShopifyVariantId: '',
+    stock: [],
+    clone: function(this: Product, ShopifyProductId: string, ShopifyVariantId: string, stock: Product['stock']) {
+        const newProduct = Object.create(this);
+        newProduct.ShopifyProductId = ShopifyProductId;
+        newProduct.ShopifyVariantId = ShopifyVariantId;
+        newProduct.stock = stock;
+        return newProduct;
+    }
+};
 
 function isValidProduct(product: any): product is Product {
     return typeof product.ShopifyProductId === 'string' && product.ShopifyProductId.length > 0 &&
@@ -49,13 +43,14 @@ function isValidProduct(product: any): product is Product {
 
 
 
+
 export async function jsonProcess(jsonArray: Array<any>): Promise<{ valid: Array<Product>; invalid: Array<any>; }> {
     let valid: Array<Product> = [];
     let invalid: Array<any> = [];
 
     jsonArray.forEach(item => {
         if (isValidProduct(item)) {
-            valid.push(new ProductPrototype(item.ShopifyProductId, item.ShopifyVariantId, item.stock));
+            valid.push(productPrototype.clone(item.ShopifyProductId, item.ShopifyVariantId, item.stock));
         } else {
             invalid.push(item);
         }

@@ -11,65 +11,85 @@ import { Router } from './router';
 import { ExecutionContext } from "@cloudflare/workers-types";
 import { jsonProcess } from './transformers/jsonProcess';
 import { Quantities, serializeToJsonL } from './transformers/serializeToJsonL';
+import { Env } from './interfaces';
+import { authorizeRequest } from './authentication/auth';
+import { StoreInitializer, getStoreDetails } from './handlers/storeDetails';
 
-export interface Env {
-	// Example binding to KV. Learn more at https://developers.cloudflare.com/workers/runtime-apis/kv/
-	// MY_KV_NAMESPACE: KVNamespace;
-	//
-	// Example binding to Durable Object. Learn more at https://developers.cloudflare.com/workers/runtime-apis/durable-objects/
-	// MY_DURABLE_OBJECT: DurableObjectNamespace;
-	//
-	// Example binding to R2. Learn more at https://developers.cloudflare.com/workers/runtime-apis/r2/
-	// MY_BUCKET: R2Bucket;
-	//
-	// Example binding to a Service. Learn more at https://developers.cloudflare.com/workers/runtime-apis/service-bindings/
-	// MY_SERVICE: Fetcher;
-	//
-	// Example binding to a Queue. Learn more at https://developers.cloudflare.com/queues/javascript-apis/
-	// MY_QUEUE: Queue;
-	SHARED_SECRET: string;
-}
+//TODO: Init the stageupload function with the gid instead of the url 
+
+
+
+
+
+
+
+
+
 export default {
     async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
+		let response 
 
-
-
+		//if (!authorizeRequest(request, env)) {response = new Response('Unauthorized', { status: 401 });return response;}
 		//this needs to be rewritten  to use router instead 
-		if (request.method === 'POST') {
-            const postedData: any[] = await request.json() as any[];
+		//
+		const storeInitializer = new StoreInitializer(request, env);
+		const storeContext = storeInitializer.initializeStoreContext();
+		
+		/**
+		 * validate that store is valid
+		 */
+		if (!storeContext) {
+			return new Response('Invalid store', { status: 400 });
+		}
 
-            if (Array.isArray(postedData)) {
-                // Await the asynchronous jsonProcess function
-                const processedData = await jsonProcess(postedData);
-				const quantitiesArray = processedData.valid.map(product => {
-					// Map the stock of each ProductPrototype to the setQuantities format expected by Quantities
-					const setQuantities = product.stock.map(stockItem => {
-						return {
-							locationId: stockItem.inventoryItemId, // Assuming you want to map inventoryItemId to locationId
-							inventoryItemId: stockItem.locationId, // Assuming a direct mapping here
-							quantity: stockItem.available         // Map the 'available' field to 'quantity'
-						};
-					});
-				
-					return new Quantities('correction', setQuantities);
-				});
+		/**
+		 * process the request
+		 */
 
-                // Serialize Quantities instances to JSONL
-               
-				const jsonl= serializeToJsonL(quantitiesArray);
-                //console.log("Processed Data:", JSON.stringify(processedData));
-                return new Response(JSON.stringify(jsonl));
-            }
-
-            return new Response("Posted data is not an array", { status: 400 });
-        }
-		return new Response('Received a request that was not a  POST', { status: 400 });
+		const jsonInput  = await request.json() as any[];
+		return processIncoming(request, jsonInput);
+		
 
     },
+	
 };
 
 
 
 
+
+async function processIncoming( request: Request, postedData: any[]){
+	if (request.method !== 'POST'){
+		return new Response("Not a POST request", { status: 400 });
+	}
+	if (!Array.isArray(postedData)){
+		return new Response("Posted data is not an array", { status: 400 });
+	}
+	const processedData = await jsonProcess(postedData);
+	const quantitiesArray = processedData.valid.map(product => {
+		// Map the stock of each ProductPrototype to the setQuantities format expected by Quantities
+		const setQuantities = product.stock.map(stockItem => {
+			return {
+				locationId: stockItem.inventoryItemId, // Assuming you want to map inventoryItemId to locationId
+				inventoryItemId: stockItem.locationId, // Assuming a direct mapping here
+				quantity: stockItem.available         // Map the 'available' field to 'quantity'
+			};
+		});
+	
+		return new Quantities('correction', setQuantities);
+	});
+
+	// Serialize Quantities instances to JSONL
+   
+	const jsonl= serializeToJsonL(quantitiesArray);
+
+	//we will workwith the jsonl
+	//console.log("Processed Data:", JSON.stringify(processedData));
+	return new Response(JSON.stringify(jsonl));
+
+}
+
+
+//TODO: Continue to make the mutation to shopify 
 
 

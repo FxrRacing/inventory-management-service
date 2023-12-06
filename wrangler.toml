@@ -5,9 +5,24 @@ compatibility_date = "2023-11-21"
 # Variable bindings. These are arbitrary, plaintext strings (similar to environment variables)
 # Note: Use secrets to store sensitive data.
 # Docs: https://developers.cloudflare.com/workers/platform/environment-variables
-# [vars]
-# MY_VARIABLE = "production_value"
+[vars]
+ MY_VARIABLE = "production_value"
+ STR_US_API_URL="fxr-racing-com"
+STR_SE_API_URL="fxr-racing-se"
+STR_CA_API_URL="fxr-racing-ca"
+STR_WPG_API_URL="adrenalinewpg"
+STR_EDM_API_URL="adrenalineedm"
+STR_FL_API_URL="fxr-retail-fl"
+STR_SASK_API_URL="adrenalinesask"
+STR_NO_API_URL="fxr-racing-no"
 
+[env.staging]
+name = "inventory-management-staging"
+
+
+routes = [
+	{ pattern = "https://staging.inventory-management.fxrracing.com/*", zone_name = "tight-poetry-ac2d.workers.dev" }
+]
 # Bind a KV Namespace. Use KV as persistent storage for small key-value pairs.
 # Docs: https://developers.cloudflare.com/workers/runtime-apis/kv
 # [[kv_namespaces]]

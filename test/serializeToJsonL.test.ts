@@ -1,4 +1,4 @@
-import { ProductPrototype } from "../src/transformers/jsonProcess";
+
 import { serializeToJsonL, Quantities } from "../src/transformers/serializeToJsonL";
 
 /**

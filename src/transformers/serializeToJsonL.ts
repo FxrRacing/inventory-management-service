@@ -1,12 +1,13 @@
 export class Quantities {
-    input: {
+    public input: {
         reason: string;
         setQuantities: Array<{
             locationId: string;
             inventoryItemId: string;
-            quantity: number; // Corrected spelling of 'quantity'
+            quantity: number;
         }>;
     };
+
     constructor(
         reason: string,
         setQuantities: Array<{
@@ -20,9 +21,14 @@ export class Quantities {
             setQuantities,
         };
     }
-    
 
+    public clone(): Quantities {
+        const clonedSetQuantities = this.input.setQuantities.map(item => ({ ...item }));
+        return new Quantities(this.input.reason, clonedSetQuantities);
+    }
 }
+
+
 
 
 

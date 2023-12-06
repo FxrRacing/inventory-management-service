@@ -1,7 +1,7 @@
 import { json } from "../jest.config";
 
 const jsonData = require('./test.json');
-import { jsonProcess, ProductPrototype,Product } from '../src/transformers/jsonProcess';
+import { jsonProcess,Product,productPrototype } from '../src/transformers/jsonProcess';
 
 
 
@@ -21,7 +21,7 @@ describe('jsonProcess', () => {
     //init new product prototype
     
     beforeEach(() => {
-       let Prototype = new ProductPrototype(
+       let Prototype = productPrototype.clone(
               '123',
               '456',
               [

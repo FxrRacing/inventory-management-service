@@ -1,4 +1,4 @@
-import {Env} from "../index";
+import {Env} from "../interfaces";
 
 const hasValidHeader=(request: Request, env: Env): boolean => {
     const requestHeader = request.headers.get('X-Auth-Key');
