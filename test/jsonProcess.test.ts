@@ -1,7 +1,7 @@
 import { json } from "../jest.config";
 
 const jsonData = require('./test.json');
-import { jsonProcess,Product,productPrototype } from '../src/transformers/jsonProcess';
+import { validateAndTransformData,Product,productPrototype } from '../src/transformers/jsonProcess';
 
 
 
@@ -21,29 +21,14 @@ describe('jsonProcess', () => {
     //init new product prototype
     
     beforeEach(() => {
-       let Prototype = productPrototype.clone(
-              '123',
-              '456',
-              [
-                {
-                     inventoryItemId: '789',
-                     locationId: '101',
-                     available: 5,
-                     updatedAt: '2023-04-01T00:00:00Z',
-                },
-                {
-                    inventoryItemId: '789',
-                    locationId: '101',
-                    available: 5,
-                    updatedAt: '2023-04-01T00:00:00Z',}
-              ]
-         );
-       ;}
+        
+        //let Prototype = productPrototype.clone(jsonData);
+    }
     );
     const jsonArray: Array<Product> = jsonData;
 
    it('returns the json array with the correct interface', async () => {
-    expect(() => jsonProcess(jsonArray)).not.toThrow();
+    expect(() => validateAndTransformData(jsonArray)).not.toThrow();
    });
 
    it('returns invalid items with an invalid count for wrong types', async () => {
@@ -74,7 +59,7 @@ describe('jsonProcess', () => {
         },
     ];
 
-    const { valid, invalid } = await jsonProcess(invalidCount);
+    const { valid, invalid } = await validateAndTransformData(invalidCount);
 
     expect(valid).toHaveLength(1);
     expect(invalid).toHaveLength(1);
@@ -107,7 +92,7 @@ describe('jsonProcess', () => {
         },
         
     ];
-    const { valid, invalid } = await jsonProcess(invalidCount);
+    const { valid, invalid } = await  validateAndTransformData(invalidCount);
 
     //expect(valid).toHaveLength(1);
     expect(invalid).toHaveLength(1);
@@ -119,7 +104,7 @@ describe('jsonProcess', () => {
 
    it('returns an empty array if the json array is empty', async() => {
     const emptyArray: Array<any> = [];
-    const { valid, invalid } =  await jsonProcess(emptyArray);
+    const { valid, invalid } =  await validateAndTransformData(emptyArray);
 
     expect(valid).toHaveLength(0);
     expect(invalid).toHaveLength(0);
@@ -172,7 +157,7 @@ describe('jsonProcess', () => {
         }
     ];
 
-    const { valid, invalid } = await jsonProcess(validCount);
+    const { valid, invalid } = await validateAndTransformData(validCount);
 
     expect(valid).toHaveLength(2);
     expect(invalid).toHaveLength(0);

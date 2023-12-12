@@ -1,35 +1,38 @@
+/**
+ * Test Suite for UpdateInventoryQuantities Class
+ *
+ * This test suite is designed to validate the functionality of the `UpdateInventoryQuantities` class, 
+ * focusing on the 
+ *  1. `stageUpload` method
+ * 2.`uploadFile` method
+ * 3.`updateInventoryQuantities` method - a mutation method that will update the inventory quantities in shopify
+ *
+ * Test Setup:
+ * - The suite uses a `beforeEach` block to create a fresh instance of `UpdateInventoryQuantities` before each test, 
+ *   ensuring isolated test environments. This setup includes providing mock `context` and `key` parameters 
+ *   needed for the class constructor.
+ * - Additionally, the global `fetch` function is mocked. This is essential as the `stageUpload` method 
+ *   depends on making network requests. The mock intercepts these requests, allowing us to simulate 
+ *   various response scenarios without actual network calls.
+ *
+ * Individual Test:
+ * - The test case defined checks if the `stageUpload` method correctly returns a URL and data parameters 
+ *   for a valid object. This is crucial for verifying the method's ability to handle and format the response 
+ *   from a staged upload process.
+ * - The response from the mocked `fetch` call is set up to return a predefined JSON structure. This structure 
+ *   mimics a successful response from the actual endpoint, including essential data like URLs and parameters.
+ * - The test asserts whether the actual response from `stageUpload` matches the expected structure defined 
+ *   in the test, ensuring the method's correctness in handling and parsing the network response.
+ */
+
+
+
+
 import { Env } from "../src/interfaces";
-type StoreDetails= {storeUrl: string, storeKey: string};
-export type DataParam = {name: string, value: string};
-interface Parameter {
-	name: string;
-	value: string;
-}
-
-interface StagedTarget {
-	url: string;
-	resourceUrl: null;
-	parameters: Parameter[];
-}
-
-export interface StagedUploadResponse {
-	data: {
-		stagedUploadsCreate: {
-			userErrors: any[]; // Define the expected shape if known
-			stagedTargets: StagedTarget[];
-		};
-	};
-	extensions?: {
-		cost: {
-			requestedQueryCost: number;
-			actualQueryCost: number;
-		};
-	};
-}
+import{ UpdateInventoryQuantities , StoreDetails} from "../src/transformers/updateInventory";
 
 
-
-describe('updateInventoryQuantities', () => {
+describe('Successfully creates and upload path', () => {
     let updateInventoryQuantities: UpdateInventoryQuantities
     const context: StoreDetails = {
         storeUrl: 'https://test.com',
@@ -71,7 +74,7 @@ describe('updateInventoryQuantities', () => {
     });
     afterEach(() => {
         jest.resetAllMocks();
-        
+
     });
 
 
@@ -109,58 +112,13 @@ describe('updateInventoryQuantities', () => {
 
 
 
-class UpdateInventoryQuantities{
-    //private request: Request;
-   // private env: Env;
-    private context: StoreDetails ;
-    private key: string;
-    constructor( context: StoreDetails, key: string) {
-      //  this.request = request;
-       // this.env = env;
-        this.context = context;
-        this.key = key;
-    }
-    public async stageUpload(): Promise<{ url: string, dataParams: DataParam[] }| null> {
-       
-        const{ storeUrl, storeKey} = this.context;
-        const mutation = `mutation StagedUploadsCreate {
-            stagedUploadsCreate(
-                input: {filename: "${this.key}", mimeType: "text/jsonl", httpMethod: POST, resource: BULK_MUTATION_VARIABLES}
-            ) {
-                stagedTargets {
-                    resourceUrl
-                    url
-                    parameters {
-                        name
-                        value
-                    }
-                }
-                userErrors {
-                    field
-                    message
-                }
-            }
-        }`;
-        try {
-            const request: RequestInit = {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-Shopify-Access-Token': storeKey,
-                },
-                body: JSON.stringify({ query: mutation }),
-            };
-            const response = await fetch(storeUrl, request);
-            const responseJson = await response.json()as  StagedUploadResponse;
-            const url = responseJson.data.stagedUploadsCreate.stagedTargets[0].url;
-            const dataParams = responseJson.data?.stagedUploadsCreate.stagedTargets[0].parameters;
-            return { url, dataParams };
-        } catch (error) {
-            
-        }
 
-        return null;
-        
-    }
 
-}
+
+
+/**
+ * test suite for the uploadfile method
+ * 
+ * 
+ */
+
