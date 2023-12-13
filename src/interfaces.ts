@@ -35,3 +35,30 @@ export interface Env {
 	SENTRY_DSN: string;
 
 }
+
+export interface BulkOperationResponse {
+	data: {
+		bulkOperationRunMutation: {
+			bulkOperation: {
+				id: string;
+				url: null | string;
+				status: string;
+			} | null; //bulk Operation can be null with errors
+			userErrors: {
+				message?: string;
+				field?: null | string;
+			}[];
+		};
+	};
+	extensions: {
+		const: {
+			requestedQueryCost: number;
+			actualQueryCost: number;
+			throttleStatus: {
+				maximumAvailable: number;
+				currentlyAvailable: number;
+				restoreRate: number;
+			};
+		};
+	};
+}

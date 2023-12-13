@@ -12,6 +12,8 @@ export interface Product {
     clone: (product: Product) => Product;
 }
  
+const INVENTORY_ITEM_PREFIX = 'gid://shopify/InventoryItem/';
+const LOCATION_PREFIX = 'gid://shopify/Location/';
 export const productPrototype: Product = {
     shopifyProductId: '',
     shopifyVariantId: '',
@@ -20,7 +22,10 @@ export const productPrototype: Product = {
         return {
             shopifyProductId: product.shopifyProductId,
             shopifyVariantId: product.shopifyVariantId,
-            stock: product.stock.map(item => ({ ...item })), // Assuming StockItem objects are shallow
+            stock: product.stock.map(item => ({ ...item,
+            inventoryItemId: INVENTORY_ITEM_PREFIX + item.inventoryItemId,
+            locationId: LOCATION_PREFIX + item.locationId
+        })), // Assuming StockItem objects are shallow
             clone: this.clone // Keep the clone method reference
         };
     }
@@ -28,8 +33,8 @@ export const productPrototype: Product = {
  
 function isValidStockItem(item: any): item is StockItem {
     return typeof item === 'object' &&
-           typeof item.inventoryItemId === 'string' && item.inventoryItemId.length &&
-           typeof item.locationId === 'string' && item.locationId.length &&
+           typeof item.inventoryItemId === 'string' && item.inventoryItemId.length >1 &&
+           typeof item.locationId === 'string' && item.locationId.length>1 &&
            typeof item.available === 'number' &&
            typeof item.updatedAt === 'string';
 }

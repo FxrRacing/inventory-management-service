@@ -18,7 +18,9 @@ export class Quantities {
     ) {
         this.input = {
             reason,
-            setQuantities,
+            setQuantities: setQuantities.map(q => ({
+                ...q,
+            })),
         };
     }
 
@@ -27,14 +29,16 @@ export class Quantities {
         return new Quantities(this.input.reason, clonedSetQuantities);
     }
 }
-
-
-
-
-
-export function serializeToJsonL(data: any[]): string {
+export function serializeToJsonL(data: Quantities[]) {
     if (!Array.isArray(data) || data.length === 0) {
         return '';
     }
-    return data.map((item: any) => JSON.stringify(item)).join('\n') + '\n';
+    const serializedData = {
+        input: {
+            reason: data[0].input.reason,
+            setQuantities: data.flatMap(d => d.input.setQuantities)
+        }
+    };
+
+    return JSON.stringify(serializedData);
 }

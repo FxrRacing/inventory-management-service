@@ -11,10 +11,10 @@
 import { ExecutionContext } from "@cloudflare/workers-types";
 import { validateAndTransformData } from './transformers/jsonProcess';
 import { Quantities, serializeToJsonL } from './transformers/serializeToJsonL';
-import { Env } from './interfaces';
+import { BulkOperationResponse, Env } from './interfaces';
 import { authorizeRequest } from './authentication/auth';
 import { StoreInitializer, getStoreDetails } from './handlers/storeDetails';
-import { Router, error} from 'itty-router';
+import { Router, error, json} from 'itty-router';
 import { UpdateInventoryQuantities } from "./transformers/updateInventory";
 
 //TODO: Init the stageupload function with the gid instead of the url 
@@ -41,31 +41,38 @@ router.post('/inventory/:region', async (request, env) => {
         return new Response('Invalid store, are you making up regions?', { status: 400 });
     }
 
-	const { storeUrl, storeKey } = storeContext;
 
 	try {
-       
         const postedData = await request.json() as any[]; 
 		console.log('Processing data for region:', region); 
-        const processingResult = await processDataForPriceCorrectionJsonL(request, postedData);
+       const  { processCount, invalidCount, jsonl } = await processDataForPriceCorrectionJsonL(request, postedData);
 		
 		const fileUploadName= 'bulk_op_vars'
 		const inventoryUpdate = new UpdateInventoryQuantities(storeContext, fileUploadName);
-		const stageUploadResult = await inventoryUpdate.stageUpload();
-		if (stageUploadResult == null) {
-			throw new Error('Error staging upload');
-		}
-		const { url, dataParams } = stageUploadResult;
-			// Your code logic here
-			console.log(url, dataParams);
-		const urlUploadPath = await inventoryUpdate.uploadFile(url, dataParams, processingResult.jsonl);
-//processingResult instanceof Response ? processingResult : new Response(JSON.stringify(processingResult)); // Ta-da! Here's your magic show
-       return urlUploadPath;
+		// const stageUploadResult = await inventoryUpdate.stageUpload();
+		// if (stageUploadResult == null) {
+		// 	throw new Error('Error staging upload');
+		// }
+		// const { url, dataParams } = stageUploadResult;
+			
+		// const urlUploadPath = await inventoryUpdate.uploadFile(url, dataParams, jsonl);
+		// console.log('urlUploadPath', urlUploadPath);
+		// the mutation to shopify is then made 
+		const bulkOperation = await sendBulkMutationToShopify(inventoryUpdate,jsonl) ;
+		const responseObject = {
+			processCount: processCount,
+			invalidCount: invalidCount,
+			bulkOperationId: bulkOperation,
+		};
+		
+		return new Response(JSON.stringify(responseObject), { headers: { 'Content-Type': 'application/json' } });
     } catch (error) {
         console.error(error); // Don't just stand there, log the error
         return new Response('Error processing data', { status: 500 });
     }
 });
+
+
 router.all('*', () => error(404))
 
 
@@ -76,10 +83,15 @@ export default {
 		return router.handle(request, env, ctx);
     },
 	
+	
 };
 
 
+async function sendBulkMutationToShopify( inventoryUpdate: UpdateInventoryQuantities,  jsonl: any){
+	const bulkOperation = await inventoryUpdate.sendBulkMutation(jsonl) ;
+	return bulkOperation;
 
+}
 
 
 async function processDataForPriceCorrectionJsonL( request: Request, postedData: any[]){
