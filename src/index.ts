@@ -51,7 +51,7 @@ router.post('/inventory/:region', async (request, env) => {
 		const inventoryUpdate = new UpdateInventoryQuantities(storeContext, fileUploadName);
 		// const stageUploadResult = await inventoryUpdate.stageUpload();
 		// if (stageUploadResult == null) {
-		// 	throw new Error('Error staging upload');
+		// 	throw new Error('Erreor staging upload');
 		// }
 		// const { url, dataParams } = stageUploadResult;
 			
