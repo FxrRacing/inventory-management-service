@@ -1,60 +1,80 @@
-export interface Product {
-    ShopifyProductId: string;
-    ShopifyVariantId: string;
-    stock: Array<{
-        inventoryItemId: string;
-        locationId: string;
-        available: number;
-        updatedAt: string;
-    }>;
-    clone: (ShopifyProductId: string, ShopifyVariantId: string, stock: Array<{
-        inventoryItemId: string;
-        locationId: string;
-        available: number;
-        updatedAt: string;
-    }>) => Product;
+export interface StockItem {
+    inventoryItemId: string;
+    locationId: string;
+    available: number;
+    updatedAt: string;
 }
-
-
+ 
+export interface Product {
+    shopifyProductId: string;
+    shopifyVariantId: string;
+    stock: StockItem[];
+    clone: (product: Product) => Product;
+}
+ 
+const INVENTORY_ITEM_PREFIX = 'gid://shopify/InventoryItem/';
+const LOCATION_PREFIX = 'gid://shopify/Location/';
 export const productPrototype: Product = {
-    ShopifyProductId: '',
-    ShopifyVariantId: '',
+    shopifyProductId: '',
+    shopifyVariantId: '',
     stock: [],
-    clone: function(this: Product, ShopifyProductId: string, ShopifyVariantId: string, stock: Product['stock']) {
-        const newProduct = Object.create(this);
-        newProduct.ShopifyProductId = ShopifyProductId;
-        newProduct.ShopifyVariantId = ShopifyVariantId;
-        newProduct.stock = stock;
-        return newProduct;
+    clone: function(product: Product): Product {
+        return {
+            shopifyProductId: product.shopifyProductId,
+            shopifyVariantId: product.shopifyVariantId,
+            stock: product.stock.map(item => ({ ...item,
+            inventoryItemId: INVENTORY_ITEM_PREFIX + item.inventoryItemId,
+            locationId: LOCATION_PREFIX + item.locationId
+        })), // Assuming StockItem objects are shallow
+            clone: this.clone // Keep the clone method reference
+        };
     }
 };
-
+ 
+function isValidStockItem(item: any): item is StockItem {
+    return typeof item === 'object' &&
+           typeof item.inventoryItemId === 'string' && item.inventoryItemId.length >1 &&
+           typeof item.locationId === 'string' && item.locationId.length>1 &&
+           typeof item.available === 'number' &&
+           typeof item.updatedAt === 'string';
+}
+ 
 function isValidProduct(product: any): product is Product {
-    return typeof product.ShopifyProductId === 'string' && product.ShopifyProductId.length > 0 &&
-           typeof product.ShopifyVariantId === 'string' && product.ShopifyVariantId.length > 0 &&
-           Array.isArray(product.stock) &&
-           product.stock.every((stockItem: { inventoryItemId: any; locationId: any; available: any; updatedAt: any; }) => 
-               typeof stockItem.inventoryItemId === 'string' && stockItem.inventoryItemId.length > 0 &&
-               typeof stockItem.locationId === 'string' && stockItem.locationId.length > 0 &&
-               typeof stockItem.available === 'number' && 
-               typeof stockItem.updatedAt === 'string'
-           );
+    return typeof product === 'object' &&
+           typeof product.ShopifyProductId === 'string' && product.ShopifyProductId.length &&
+           typeof product.ShopifyVariantId === 'string' && product.ShopifyVariantId.length &&
+           Array.isArray(product.stock) && product.stock.every(isValidStockItem);
+}
+
+export async function validateAndTransformData(jsonArray: Array<any>): Promise<{ valid: Product[]; invalid: any[]; }> {
+    //console.log('this is the json array',jsonArray);
+    const validProducts = jsonArray.filter(isValidProduct).map(product => productPrototype.clone(product));
+    const invalidProducts = jsonArray.filter(item => !isValidProduct(item));
+  
+
+    return { valid: validProducts, invalid: invalidProducts };
 }
 
 
 
 
-export async function jsonProcess(jsonArray: Array<any>): Promise<{ valid: Array<Product>; invalid: Array<any>; }> {
-    let valid: Array<Product> = [];
-    let invalid: Array<any> = [];
 
-    jsonArray.forEach(item => {
-        if (isValidProduct(item)) {
-            valid.push(productPrototype.clone(item.ShopifyProductId, item.ShopifyVariantId, item.stock));
-        } else {
-            invalid.push(item);
-        }
-    });
+// function isValidStockItem(item: unknown): item is StockItem {
+//     return typeof item === 'object' &&
+//            item !== null &&
+//            'inventoryItemId' in item && typeof (item as StockItem).inventoryItemId === 'string' && (item as StockItem).inventoryItemId.length > 0 &&
+//            'locationId' in item && typeof (item as StockItem).locationId === 'string' && (item as StockItem).locationId.length > 0 &&
+//            'available' in item && typeof (item as StockItem).available === 'number' &&
+//            'updatedAt' in item && typeof (item as StockItem).updatedAt === 'string';
+// }
 
-    return { valid, invalid };
-}
+// function isValidProduct(product: unknown): product is Product {
+//     return typeof product === 'object' &&
+//            product !== null &&
+//            'shopifyProductId' in product && typeof (product as Product).shopifyProductId === 'string' && (product as Product).shopifyProductId.length > 0 &&
+//            'shopifyVariantId' in product && typeof (product as Product).shopifyVariantId === 'string' && (product as Product).shopifyVariantId.length > 0 &&
+//            'stock' in product && Array.isArray((product as Product).stock) && (product as Product).stock.every(isValidStockItem);
+// }
+ 
+
+

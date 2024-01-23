@@ -63,14 +63,14 @@ export class StoreInitializer {
     private endpoint: string;
     private storeContext: StoreDetails | undefined;
 
-    constructor(request: Request, env: Env) {
+    constructor(request: Request, env: Env, region: string) {
         this.request = request;
         this.env = env;
         this.url = new URL(request.url);
         const pathDetails = this.extractPathDetails(this.url.pathname);
         this.store = pathDetails.store;
         this.endpoint = pathDetails.endpoint;
-        this.storeContext = this.getStoreDetails(this.store);
+        this.storeContext = this.getStoreDetails(region);
     }
 
     private extractPathDetails(pathname: string): { store: string, endpoint: string } {
