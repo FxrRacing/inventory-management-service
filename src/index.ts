@@ -16,6 +16,7 @@ import { authorizeRequest } from './authentication/auth';
 import { StoreInitializer, getStoreDetails } from './handlers/storeDetails';
 import { Router, error, json} from 'itty-router';
 import { UpdateInventoryQuantities } from "./transformers/updateInventory";
+import { hi, id } from "date-fns/locale";
 
 //TODO: Init the stageupload function with the gid instead of the url 
 
@@ -24,6 +25,24 @@ import { UpdateInventoryQuantities } from "./transformers/updateInventory";
 const router = Router();
 
 router.get('/', () => new Response('Hello worker!'));
+
+router.get('/inventory/:region', async (request, env) => {
+    const { region } = request.params;
+    const storeInitializer = new StoreInitializer(request, env, region); // Finally using the region, slow clap
+
+    const storeContext = storeInitializer.initializeStoreContext();
+
+    if (!storeContext) {
+        console.error('Invalid store context for region:', region);
+        return new Response('Invalid store, are you making up regions?', { status: 400 });
+    }
+
+    const file = await  env.MY_BUCKET.get(`${storeContext.storeUrl}-inventory-update.json`, { type: 'json' });
+    if (!file) {
+        return new Response('No file found', { status: 404 });
+    }
+    return new Response(file.body, { headers: { 'Content-Type': 'application/json' } });
+});
 
 
 
@@ -45,7 +64,7 @@ router.post('/inventory/:region', async (request, env) => {
 	try {
         const postedData = await request.json() as any[]; 
 		console.log('Processing data for region:', region); 
-       const  { processCount, invalidCount, jsonl } = await processDataForPriceCorrectionJsonL(request, postedData);
+       const  { processCount, invalidCount, jsonl,  historyRef } = await processDataForPriceCorrectionJsonL(request, postedData, storeContext.storeUrl);
 		
 		const fileUploadName= 'bulk_op_vars'
 		const inventoryUpdate = new UpdateInventoryQuantities(storeContext, fileUploadName);
@@ -58,11 +77,20 @@ router.post('/inventory/:region', async (request, env) => {
 		// const urlUploadPath = await inventoryUpdate.uploadFile(url, dataParams, jsonl);
 		// console.log('urlUploadPath', urlUploadPath);
 		// the mutation to shopify is then made 
+      // console.log("this is our jsonl ",jsonl)
+        const currentTime = new Date().toISOString();
+      const fileName = `${storeContext.storeUrl}-inventory-update-${currentTime}.json`;
+      console.log('fileName', fileName);
+        const object = await env.MY_BUCKET.put(fileName, JSON.stringify(historyRef), {
+            httpMetadata: request.headers,
+          })
+          console.log('object', object);
 		const bulkOperation = await sendBulkMutationToShopify(inventoryUpdate,jsonl) ;
 		const responseObject = {
 			processCount: processCount,
 			invalidCount: invalidCount,
-			bulkOperationId: bulkOperation,
+			InventoryUpdate: bulkOperation,
+          
 		};
 		
 		return new Response(JSON.stringify(responseObject), { headers: { 'Content-Type': 'application/json' } });
@@ -94,7 +122,7 @@ async function sendBulkMutationToShopify( inventoryUpdate: UpdateInventoryQuanti
 }
 
 
-async function processDataForPriceCorrectionJsonL( request: Request, postedData: any[]){
+async function processDataForPriceCorrectionJsonL( request: Request, postedData: any[], storeUrl: string){
 	
 	if (!Array.isArray(postedData)) {
         throw new Error("Posted data must be an array"); 
@@ -112,12 +140,19 @@ async function processDataForPriceCorrectionJsonL( request: Request, postedData:
             // 'correction' here represents the reason for price change
             return new Quantities('correction', productQuantities);
         });
-		
+        
+       
+      
+        const historyRef = processedData.valid.map(product => ({
+            variantID: `https://${storeUrl}.myshopify.com/admin/products/${product.ShopifyProductId}/variants/${product.ShopifyVariantId}.json`,// ` https://${storeUrl}.myshopify.com/admin/products/${product.ShopifyProductId}/variants/${product.ShopifyVariantId}`
+            urlReferences: `https://${storeUrl}${product.stock.map(stockItem => stockItem.historyUrl)}/inventory_history`
+        }));
         const jsonl = serializeToJsonL(quantitiesArray);
         const processCount = processedData.valid.length;
         const invalidCount = processedData.invalid.length;
+
 		
-        return { processCount, invalidCount, jsonl };
+        return { processCount, invalidCount, jsonl, historyRef };
     } catch (error) {
 		console.error('Error:', error); 
         throw new Error("Error processing data");

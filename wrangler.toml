@@ -15,9 +15,15 @@ STR_EDM_API_URL="adrenalineedm"
 STR_FL_API_URL="fxr-retail-fl"
 STR_SASK_API_URL="adrenalinesask"
 STR_NO_API_URL="fxr-racing-no"
+[[r2_buckets]]
+binding="MY_BUCKET"
+bucket_name="inventory"
+preview_bucket_name="inventory-preview"
+
 
 [env.staging]
 name = "inventory-management-staging"
+
 
 
 routes = [
