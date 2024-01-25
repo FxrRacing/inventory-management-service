@@ -14,7 +14,7 @@ export interface Env {
 	// Example binding to a Queue. Learn more at https://developers.cloudflare.com/queues/javascript-apis/
 	// MY_QUEUE: Queue;
 	SHARED_SECRET: string;
-//
+
     STR_US_API_URL: string;
 	STR_SE_API_URL: string;
 	STR_CA_API_URL: string;
@@ -33,6 +33,7 @@ export interface Env {
 	STR_NO_API_KEY: string;
 	/** Sentry DSN */
 	SENTRY_DSN: string;
+	MY_BUCKET: R2Bucket;
 
 }
 
@@ -48,7 +49,7 @@ export interface BulkOperationResponse {
 				message?: string;
 				field?: null | string;
 			}[];
-		};
+		};  
 	};
 	extensions: {
 		const: {
@@ -62,3 +63,4 @@ export interface BulkOperationResponse {
 		};
 	};
 }
+

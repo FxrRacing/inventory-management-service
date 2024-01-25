@@ -16,6 +16,7 @@ import { authorizeRequest } from './authentication/auth';
 import { StoreInitializer, getStoreDetails } from './handlers/storeDetails';
 import { Router, error, json} from 'itty-router';
 import { UpdateInventoryQuantities } from "./transformers/updateInventory";
+import { hi, id } from "date-fns/locale";
 
 //TODO: Init the stageupload function with the gid instead of the url 
 
@@ -24,6 +25,41 @@ import { UpdateInventoryQuantities } from "./transformers/updateInventory";
 const router = Router();
 
 router.get('/', () => new Response('Hello worker!'));
+
+router.get('/inventory/:store', async (request, env) => {
+    const { store } = request.params;
+    const url = new URL(request.url);
+    const limit = parseInt(url.searchParams.get('limit') ?? '50', 10);
+    const options: R2ListOptions = {
+        limit: limit,
+        prefix: store ?? undefined,
+        delimiter: url.searchParams.get('delimiter') ?? undefined,
+        cursor: url.searchParams.get('cursor') ?? undefined,
+        include: ['customMetadata', 'httpMetadata'],
+      }
+   
+   //🍀💻🔥
+   
+    const listing = await env.MY_BUCKET.list(options);
+    
+    return new Response(JSON.stringify(listing), {headers: {
+        'content-type': 'application/json; charset=UTF-8', 
+      }})
+});
+
+
+router.get('/inventory/:store/:name', async (request, env) => {
+    const {store, name } = request.params;
+    if (!name) {
+        return new Response('Missing file name', { status: 400 });
+    }
+   
+    const file = await  env.MY_BUCKET.get(`${name}`, { type: 'json' });
+    if (!file) {
+        return new Response('No file found', { status: 404 });
+    }
+    return new Response(file.body, { headers: { 'Content-Type': 'application/json' } });
+});
 
 
 
@@ -45,7 +81,7 @@ router.post('/inventory/:region', async (request, env) => {
 	try {
         const postedData = await request.json() as any[]; 
 		console.log('Processing data for region:', region); 
-       const  { processCount, invalidCount, jsonl } = await processDataForPriceCorrectionJsonL(request, postedData);
+       const  { processCount, invalidCount, jsonl,  historyRef } = await processDataForPriceCorrectionJsonL(request, postedData, storeContext.storeUrl);
 		
 		const fileUploadName= 'bulk_op_vars'
 		const inventoryUpdate = new UpdateInventoryQuantities(storeContext, fileUploadName);
@@ -58,11 +94,20 @@ router.post('/inventory/:region', async (request, env) => {
 		// const urlUploadPath = await inventoryUpdate.uploadFile(url, dataParams, jsonl);
 		// console.log('urlUploadPath', urlUploadPath);
 		// the mutation to shopify is then made 
+      // console.log("this is our jsonl ",jsonl)
+        const currentTime = new Date().toISOString();
+      const fileName = `${storeContext.storeUrl}-inventory-update-${currentTime}.json`;
+      console.log('fileName', fileName);
+        const object = await env.MY_BUCKET.put(fileName, JSON.stringify(historyRef), {
+            httpMetadata: request.headers,
+          })
+          console.log('object', object);
 		const bulkOperation = await sendBulkMutationToShopify(inventoryUpdate,jsonl) ;
 		const responseObject = {
 			processCount: processCount,
 			invalidCount: invalidCount,
-			bulkOperationId: bulkOperation,
+			InventoryUpdate: bulkOperation,
+          
 		};
 		
 		return new Response(JSON.stringify(responseObject), { headers: { 'Content-Type': 'application/json' } });
@@ -94,7 +139,7 @@ async function sendBulkMutationToShopify( inventoryUpdate: UpdateInventoryQuanti
 }
 
 
-async function processDataForPriceCorrectionJsonL( request: Request, postedData: any[]){
+async function processDataForPriceCorrectionJsonL( request: Request, postedData: any[], storeUrl: string){
 	
 	if (!Array.isArray(postedData)) {
         throw new Error("Posted data must be an array"); 
@@ -112,12 +157,19 @@ async function processDataForPriceCorrectionJsonL( request: Request, postedData:
             // 'correction' here represents the reason for price change
             return new Quantities('correction', productQuantities);
         });
-		
+        
+       
+      
+        const historyRef = processedData.valid.map(product => ({
+            variantID: `https://${storeUrl}.myshopify.com/admin/products/${product.ShopifyProductId}/variants/${product.ShopifyVariantId}.json`,// ` https://${storeUrl}.myshopify.com/admin/products/${product.ShopifyProductId}/variants/${product.ShopifyVariantId}`
+            urlReferences: `https://${storeUrl}${product.stock.map(stockItem => stockItem.historyUrl)}/inventory_history`
+        }));
         const jsonl = serializeToJsonL(quantitiesArray);
         const processCount = processedData.valid.length;
         const invalidCount = processedData.invalid.length;
+
 		
-        return { processCount, invalidCount, jsonl };
+        return { processCount, invalidCount, jsonl, historyRef };
     } catch (error) {
 		console.error('Error:', error); 
         throw new Error("Error processing data");

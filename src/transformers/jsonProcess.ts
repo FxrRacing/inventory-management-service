@@ -1,30 +1,34 @@
 export interface StockItem {
     inventoryItemId: string;
     locationId: string;
+    historyUrl: string;
     available: number;
     updatedAt: string;
 }
  
 export interface Product {
-    shopifyProductId: string;
-    shopifyVariantId: string;
+    ShopifyProductId: string;
+    ShopifyVariantId: string;
     stock: StockItem[];
     clone: (product: Product) => Product;
 }
  
 const INVENTORY_ITEM_PREFIX = 'gid://shopify/InventoryItem/';
 const LOCATION_PREFIX = 'gid://shopify/Location/';
+const URL_PREFIX = '.myshopify.com/admin/products/inventory/';
 export const productPrototype: Product = {
-    shopifyProductId: '',
-    shopifyVariantId: '',
+    ShopifyProductId: '',
+    ShopifyVariantId: '',
     stock: [],
     clone: function(product: Product): Product {
         return {
-            shopifyProductId: product.shopifyProductId,
-            shopifyVariantId: product.shopifyVariantId,
-            stock: product.stock.map(item => ({ ...item,
-            inventoryItemId: INVENTORY_ITEM_PREFIX + item.inventoryItemId,
-            locationId: LOCATION_PREFIX + item.locationId
+            ShopifyProductId: product.ShopifyProductId,
+            ShopifyVariantId: product.ShopifyVariantId,
+            stock: product.stock.map(item => ({
+             ...item,
+             inventoryItemId: `${INVENTORY_ITEM_PREFIX}${item.inventoryItemId}`,
+             locationId: `${LOCATION_PREFIX}${item.locationId}`,
+             historyUrl: `${URL_PREFIX}${item.inventoryItemId}`
         })), // Assuming StockItem objects are shallow
             clone: this.clone // Keep the clone method reference
         };
@@ -34,7 +38,7 @@ export const productPrototype: Product = {
 function isValidStockItem(item: any): item is StockItem {
     return typeof item === 'object' &&
            typeof item.inventoryItemId === 'string' && item.inventoryItemId.length >1 &&
-           typeof item.locationId === 'string' && item.locationId.length>1 &&
+           typeof item.locationId === 'string' && item.locationId.length > 1 &&
            typeof item.available === 'number' &&
            typeof item.updatedAt === 'string';
 }
@@ -50,7 +54,8 @@ export async function validateAndTransformData(jsonArray: Array<any>): Promise<{
     //console.log('this is the json array',jsonArray);
     const validProducts = jsonArray.filter(isValidProduct).map(product => productPrototype.clone(product));
     const invalidProducts = jsonArray.filter(item => !isValidProduct(item));
-  
+    
+    
 
     return { valid: validProducts, invalid: invalidProducts };
 }
