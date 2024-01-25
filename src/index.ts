@@ -26,18 +26,35 @@ const router = Router();
 
 router.get('/', () => new Response('Hello worker!'));
 
-router.get('/inventory/:region', async (request, env) => {
-    const { region } = request.params;
-    const storeInitializer = new StoreInitializer(request, env, region); // Finally using the region, slow clap
+router.get('/inventory/:store', async (request, env) => {
+    const { store } = request.params;
+    const url = new URL(request.url);
+    const limit = parseInt(url.searchParams.get('limit') ?? '50', 10);
+    const options: R2ListOptions = {
+        limit: limit,
+        prefix: store ?? undefined,
+        delimiter: url.searchParams.get('delimiter') ?? undefined,
+        cursor: url.searchParams.get('cursor') ?? undefined,
+        include: ['customMetadata', 'httpMetadata'],
+      }
+   
+   //🍀💻🔥
+   
+    const listing = await env.MY_BUCKET.list(options);
+    
+    return new Response(JSON.stringify(listing), {headers: {
+        'content-type': 'application/json; charset=UTF-8', 
+      }})
+});
 
-    const storeContext = storeInitializer.initializeStoreContext();
 
-    if (!storeContext) {
-        console.error('Invalid store context for region:', region);
-        return new Response('Invalid store, are you making up regions?', { status: 400 });
+router.get('/inventory/:store/:name', async (request, env) => {
+    const {store, name } = request.params;
+    if (!name) {
+        return new Response('Missing file name', { status: 400 });
     }
-
-    const file = await  env.MY_BUCKET.get(`${storeContext.storeUrl}-inventory-update.json`, { type: 'json' });
+   
+    const file = await  env.MY_BUCKET.get(`${name}`, { type: 'json' });
     if (!file) {
         return new Response('No file found', { status: 404 });
     }
