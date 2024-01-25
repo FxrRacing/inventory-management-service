@@ -96,7 +96,7 @@ router.post('/inventory/:region', async (request, env) => {
 		// the mutation to shopify is then made 
       // console.log("this is our jsonl ",jsonl)
      
-        const currentTime = format(utcToZonedTime(new Date(), 'America/chicago'), 'yyyy-MM-ddTHH:mm:ss');
+        const currentTime = new Date().toLocaleString("en-US", { timeZone: "America/Chicago" });
       const fileName = `${storeContext.storeUrl}-inventory-update-${currentTime}.json`;
       console.log('fileName', fileName);
         const object = await env.MY_BUCKET.put(fileName, JSON.stringify(historyRef), {
