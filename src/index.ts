@@ -27,6 +27,10 @@ import moment from "moment";
 const router = Router();
 
 router.get('/', () => new Response('Hello worker!'));
+router.get('/hi',async (request, env) => {
+    const currentTime = moment().format('DD-MM-YYYYTHH-mm-ss');
+    return new Response(`Hello worker! ${currentTime}`);
+});
 
 router.get('/inventory/:store', async (request, env) => {
     const { store } = request.params;
@@ -97,7 +101,7 @@ router.post('/inventory/:region', async (request, env) => {
 		// console.log('urlUploadPath', urlUploadPath);
 		// the mutation to shopify is then made 
       // console.log("this is our jsonl ",jsonl)
-      const currentTime = moment().format();
+      const currentTime = moment().format('DD-MM-YYYYTHH-mm-ss');
       const fileName = `${storeContext.storeUrl}-inventory-update-${currentTime}.json`;
       console.log('fileName', fileName);
         const object = await env.MY_BUCKET.put(fileName, JSON.stringify(historyRef), {
@@ -163,6 +167,7 @@ async function processDataForPriceCorrectionJsonL( request: Request, postedData:
        
       
         const historyRef = processedData.valid.map(product => ({
+            productID: product.ShopifyVariantId,
             variantID: `https://${storeUrl}.myshopify.com/admin/products/${product.ShopifyProductId}/variants/${product.ShopifyVariantId}.json`,// ` https://${storeUrl}.myshopify.com/admin/products/${product.ShopifyProductId}/variants/${product.ShopifyVariantId}`
             urlReferences: `https://${storeUrl}${product.stock.map(stockItem => stockItem.historyUrl)}/inventory_history`
         }));
