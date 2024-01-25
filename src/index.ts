@@ -16,9 +16,9 @@ import { authorizeRequest } from './authentication/auth';
 import { StoreInitializer, getStoreDetails } from './handlers/storeDetails';
 import { Router, error, json} from 'itty-router';
 import { UpdateInventoryQuantities } from "./transformers/updateInventory";
-import { hi, id } from "date-fns/locale";
+import { zonedTimeToUtc, utcToZonedTime, format } from 'date-fns-tz';
 
-//TODO: Init the stageupload function with the gid instead of the url 
+
 
 
 
@@ -95,7 +95,8 @@ router.post('/inventory/:region', async (request, env) => {
 		// console.log('urlUploadPath', urlUploadPath);
 		// the mutation to shopify is then made 
       // console.log("this is our jsonl ",jsonl)
-        const currentTime = new Date().toISOString();
+     
+        const currentTime = format(utcToZonedTime(new Date(), 'America/chicago'), 'yyyy-MM-ddTHH:mm:ss');
       const fileName = `${storeContext.storeUrl}-inventory-update-${currentTime}.json`;
       console.log('fileName', fileName);
         const object = await env.MY_BUCKET.put(fileName, JSON.stringify(historyRef), {
