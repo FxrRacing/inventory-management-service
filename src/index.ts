@@ -1,12 +1,3 @@
-/**
- * Welcome to Cloudflare Workers! This is your first worker.
- *
- * - Run `npm run dev` in your terminal to start a development server
- * - Open a browser tab at http://localhost:8787/ to see your worker in action
- * - Run `npm run deploy` to publish your worker
- *
- * Learn more at https://developers.cloudflare.com/workers/
- */
 
 import { ExecutionContext } from "@cloudflare/workers-types";
 import { validateAndTransformData } from './transformers/jsonProcess';
@@ -70,11 +61,10 @@ router.get('/inventory/:store/:name', async (request, env) => {
 
 
 router.post('/inventory/:region', async (request, env) => {
-    // Wow, extracting params, such skill
-    const { region } = request.params; // Look at you, using destructuring
-
-    console.log(`Initializing store for region: ${region}`); // Logging, so advanced
-	const storeInitializer = new StoreInitializer(request, env, region); // Finally using the region, slow clap
+   
+    const { region } = request.params; 
+    console.log(`Initializing store for region: ${region}`); 
+	const storeInitializer = new StoreInitializer(request, env, region); 
 
     const storeContext = storeInitializer.initializeStoreContext();
 
@@ -130,7 +120,8 @@ router.all('*', () => error(404))
 
 export default {
     async fetch(request: Request, env: Env, ctx: ExecutionContext) {
-		//if (!authorizeRequest(request, env)) {response = new Response('Unauthorized', { status: 401 });return response;}
+        let response: Response;
+		if (!authorizeRequest(request, env)) {response = new Response('Unauthorized', { status: 401 });return response;}
 		return router.handle(request, env, ctx);
     },
 	
