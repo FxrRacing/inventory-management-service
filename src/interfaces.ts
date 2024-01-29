@@ -64,3 +64,34 @@ export interface BulkOperationResponse {
 	};
 }
 
+
+
+  export interface InventoryAdjustment {
+	data:{
+		inventorySetOnHandQuantities: {
+			userErrors: {
+				field?: string;
+				message?: string;
+			}[];
+			inventoryAdjustmentGroup: {
+				createdAt: string;
+				reason: string;
+				changes: {
+					name: string;
+					delta: number;
+				}[];
+			}[] | null;
+			}
+		}
+	extensions: {
+		const: {
+			requestedQueryCost: number;
+			actualQueryCost: number;
+			throttleStatus: {
+				maximumAvailable: number;
+				currentlyAvailable: number;
+				restoreRate: number;
+			};
+		};
+	};
+  }

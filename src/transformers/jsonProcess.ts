@@ -7,6 +7,7 @@ export interface StockItem {
 }
  
 export interface Product {
+    displayName: string;
     ShopifyProductId: string;
     ShopifyVariantId: string;
     stock: StockItem[];
@@ -17,11 +18,13 @@ const INVENTORY_ITEM_PREFIX = 'gid://shopify/InventoryItem/';
 const LOCATION_PREFIX = 'gid://shopify/Location/';
 const URL_PREFIX = '.myshopify.com/admin/products/inventory/';
 export const productPrototype: Product = {
+    displayName: '',
     ShopifyProductId: '',
     ShopifyVariantId: '',
     stock: [],
     clone: function(product: Product): Product {
         return {
+            displayName: product.displayName,
             ShopifyProductId: product.ShopifyProductId,
             ShopifyVariantId: product.ShopifyVariantId,
             stock: product.stock.map(item => ({
@@ -45,6 +48,7 @@ function isValidStockItem(item: any): item is StockItem {
  
 function isValidProduct(product: any): product is Product {
     return typeof product === 'object' &&
+              typeof product.displayName === 'string' && product.displayName.length && 
            typeof product.ShopifyProductId === 'string' && product.ShopifyProductId.length &&
            typeof product.ShopifyVariantId === 'string' && product.ShopifyVariantId.length &&
            Array.isArray(product.stock) && product.stock.every(isValidStockItem);
