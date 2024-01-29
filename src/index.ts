@@ -104,7 +104,7 @@ router.post('/inventory/:region', async (request, env) => {
           
         })
         console.log('object', object);
-        const { userErrors } = bulkOperation.data.inventorySetOnHandQuantities;
+        const userErrors = bulkOperation.data.inventorySetOnHandQuantities.userErrors;
         if (userErrors?.length) {
             return new Response(JSON.stringify(userErrors), {
                 status: 400, 
