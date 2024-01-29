@@ -56,7 +56,11 @@ router.get('/inventory/:store/:name', async (request, env) => {
     if (!file) {
         return new Response('No file found', { status: 404 });
     }
-    return new Response(file.body, { headers: { 'Content-Type': 'application/json' } });
+    const headers = new Headers();
+    headers.set('etag', file.etag);
+    headers.set('metadata', JSON.stringify(file.metadata));
+
+    return new Response(file.body, { headers: { 'Content-Type': 'application/json',  } });
 });
 
 
@@ -93,7 +97,7 @@ router.post('/inventory/:region', async (request, env) => {
             errors: bulkOperation.data.inventorySetOnHandQuantities.userErrors,
         }
         const object = await env.MY_BUCKET.put(fileName, JSON.stringify(body), {
-            httpMetadata: request.headers,
+            
             metadata: {
                 region: region,
                 productCount: processCount,
