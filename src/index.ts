@@ -58,7 +58,7 @@ router.get('/inventory/:store/:name', async (request, env) => {
     }
     const headers = new Headers();
     headers.set('etag', file.etag);
-    headers.set('metadata', JSON.stringify(file.metadata));
+    headers.set('customMetadata', JSON.stringify(file.customMetadata))
 
     return new Response(file.body, { headers: headers });
 });
@@ -97,11 +97,11 @@ router.post('/inventory/:region', async (request, env) => {
             errors: bulkOperation.data.inventorySetOnHandQuantities.userErrors,
         }
         const object = await env.MY_BUCKET.put(fileName, JSON.stringify(body), {
-            
-            metadata: {
+            customMetadata: {
                 region: region,
                 productCount: processCount,
-            },
+            }
+          
         })
         console.log('object', object);
         const { userErrors } = bulkOperation.data.inventorySetOnHandQuantities;
