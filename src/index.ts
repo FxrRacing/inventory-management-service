@@ -60,7 +60,7 @@ router.get('/inventory/:store/:name', async (request, env) => {
     headers.set('etag', file.etag);
     headers.set('metadata', JSON.stringify(file.metadata));
 
-    return new Response(file.body, { headers: { 'Content-Type': 'application/json',  } });
+    return new Response(file.body, { headers: headers });
 });
 
 
