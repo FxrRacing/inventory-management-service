@@ -30,7 +30,7 @@ router.get('/inventory/:store', async (request, env) => {
     const limit = parseInt(url.searchParams.get('limit') ?? '100', 10);
     const options: R2ListOptions = {
         limit: limit,
-        prefix: url.searchParams.get('prefix') ?? undefined,
+        prefix: store+url.searchParams.get('prefix') ?? undefined,
         delimiter: url.searchParams.get('delimiter') ?? undefined,
         cursor: url.searchParams.get('cursor') ?? undefined,
         include: ['customMetadata', 'httpMetadata'],
