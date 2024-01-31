@@ -100,6 +100,7 @@ router.post('/inventory/:region', async (request, env) => {
             customMetadata: {
                 region: region,
                 productCount: processCount,
+                errors: bulkOperation.data.inventorySetOnHandQuantities.userErrors.length
             }
           
         })
