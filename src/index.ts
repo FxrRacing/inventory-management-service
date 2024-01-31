@@ -27,7 +27,7 @@ router.get('/hi',async (request, env) => {
 router.get('/inventory/:store', async (request, env) => {
     const { store } = request.params;
     const url = new URL(request.url);
-    const limit = parseInt(url.searchParams.get('limit') ?? '100', 10);
+    const limit = parseInt(url.searchParams.get('limit') ?? '50', 10);
     const options: R2ListOptions = {
         limit: limit,
         prefix: store ?? undefined,
@@ -38,7 +38,7 @@ router.get('/inventory/:store', async (request, env) => {
    
    //🍀💻🔥
    
-    const listing = await env.MY_BUCKET.get(options);
+    const listing = await env.MY_BUCKET.list(options);
     
     return new Response(JSON.stringify(listing), {headers: {
         'content-type': 'application/json; charset=UTF-8', 
