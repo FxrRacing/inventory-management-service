@@ -174,10 +174,13 @@ async function processDataForPriceCorrectionJsonL(request: Request, postedData: 
 
 
 
-        const historyRef = processedData.valid.map(product => ({
+        const historyRef = processedData.valid.map((product, index) => ({
+            index,
+            inventoryItemId: product.stock.map(stockItem => stockItem.inventoryItemId),
             displayName: product.displayName,
-            productID: product.ShopifyVariantId,
-            variantID: `https://${storeUrl}.myshopify.com/admin/products/${product.ShopifyProductId}/variants/${product.ShopifyVariantId}`,// ` https://${storeUrl}.myshopify.com/admin/products/${product.ShopifyProductId}/variants/${product.ShopifyVariantId}`
+            productID: product.ShopifyProductId,
+            variantID: product.ShopifyVariantId,
+            variantUrl: `https://${storeUrl}.myshopify.com/admin/products/${product.ShopifyProductId}/variants/${product.ShopifyVariantId}`,// ` https://${storeUrl}.myshopify.com/admin/products/${product.ShopifyProductId}/variants/${product.ShopifyVariantId}`
             urlReferences: `https://${storeUrl}${product.stock.map(stockItem => stockItem.historyUrl)}/inventory_history`
         }));
         const jsonl = serializeToJsonL(quantitiesArray);
