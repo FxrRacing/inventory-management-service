@@ -58,6 +58,7 @@ router.get('/inventory/:store/:name', async (request, env) => {
     }
     const headers = new Headers();
     headers.set('etag', file.etag);
+    headers.set('uploaded', file.uploaded)
     headers.set('customMetadata', JSON.stringify(file.customMetadata))
 
     return new Response(file.body, { headers: headers });
