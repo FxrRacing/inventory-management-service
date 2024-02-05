@@ -63,9 +63,13 @@ router.get('/inventory/:store/:name', async (request, env) => {
 
     return new Response(file.body, { headers: headers });
 });
+const corsHeaders = {
+    'Access-Control-Allow-Headers': '*', // What headers are allowed. * is wildcard. Instead of using '*', you can specify a list of specific headers that are allowed, such as: Access-Control-Allow-Headers: X-Requested-With, Content-Type, Accept, Authorization.
+    'Access-Control-Allow-Methods': 'POST, GET', // Allowed methods. Others could be GET, PUT, DELETE etc.
+    'Access-Control-Allow-Origin': '*', // This is URLs that are allowed to access the server. * is the wildcard character meaning any URL can.
+  }
 
-
-
+router.options('*', () => new Response('OK', { status: 200, headers: corsHeaders }));
 router.post('/inventory/:region', async (request, env) => {
    
     const { region } = request.params; 
