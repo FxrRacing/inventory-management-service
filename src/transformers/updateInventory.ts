@@ -225,7 +225,7 @@ export class UpdateInventoryQuantities {
         body: JSON.stringify({ query: mutation, variables: graphqlVariables })
     });
                 if (!response.ok) {
-                    console.error('Error in sendBulkMutation', JSON.stringify(response));
+                    
                     throw new Error(`HTTP error! Status: ${response.status}`);
                 }
         
