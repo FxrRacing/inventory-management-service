@@ -1,6 +1,6 @@
 import { zonedTimeToUtc, utcToZonedTime, format } from 'date-fns-tz';
 import { XMLParser } from 'fast-xml-parser';
-import { BulkOperationResponse } from '../interfaces';
+import { BulkOperationResponse, InventoryAdjustment } from '../interfaces';
 export type StoreDetails = { storeUrl: string, storeKey: string };
 export type DataParam = { name: string, value: string };
 interface Parameter {
@@ -225,12 +225,13 @@ export class UpdateInventoryQuantities {
         body: JSON.stringify({ query: mutation, variables: graphqlVariables })
     });
                 if (!response.ok) {
+                    console.error('Error in sendBulkMutation', JSON.stringify(response));
                     throw new Error(`HTTP error! Status: ${response.status}`);
                 }
         
                 const responseData = await response.json();
                 console.log('responseData', responseData);
-                return responseData;
+                return responseData as InventoryAdjustment;
             } catch (error) {
                 console.error('Error in sendBulkMutation', error);
                 return null; // Or handle the error as appropriate
