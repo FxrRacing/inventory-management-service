@@ -191,7 +191,8 @@ async function processDataForPriceCorrectionJsonL(request: Request, postedData: 
             urlReferences: `https://${storeContext.storeUrl}${product.stock.map(stockItem => stockItem.historyUrl)}/inventory_history`
         }));
         const jsonl = serializeToJsonL(quantitiesArray);
-        const processCount = processedData.valid.length;
+        const processCount = processedData.valid;
+       
         const invalidCount = processedData.invalid.length;
 
 
@@ -205,10 +206,5 @@ async function processDataForPriceCorrectionJsonL(request: Request, postedData: 
 
 
 
-async function getIdsFromShopify(storeContext: StoreDetails) {
-
-    let data =[]
-    
-}
 
 

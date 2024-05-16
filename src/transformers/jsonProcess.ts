@@ -89,28 +89,19 @@ export async function validateAndTransformData(
 
     const shopifyData = await fetchGraphQl(inventoryQuery, storeContext);
     console.log('this is the shopify data', shopifyData);
-    const shopifyProductIds = Object.values(shopifyData.data)
-    .filter(item => item !== null)
-    .map(item => item.id);
-
-// Separate valid and invalid products based on Shopify data
-const uniqueVerifiedProductIds = new Set<string>();
-
-    // Separate valid and invalid products based on Shopify data
-    const verifiedProducts = validProducts.filter(product => {
-        const isVerified = product.stock.some(stockItem => shopifyProductIds.includes(stockItem.inventoryItemId));
-        if (isVerified) {
-            uniqueVerifiedProductIds.add(product.id);
-        }
-        return isVerified;
-    }).filter((product, index, self) => 
-        uniqueVerifiedProductIds.has(product.id) &&
-        self.findIndex(p => p.id === product.id) === index
+    const shopifyProductIds = new Set(
+        Object.values(shopifyData.data)
+            .filter(item => item !== null)
+            .map(item => item.id)
     );
 
-   
+// Separate valid and invalid products based on Shopify data
+const verifiedProducts = validProducts.filter(product =>
+    product.stock.some(stockItem => shopifyProductIds.has(stockItem.inventoryItemId))
+);
+
 const invalidProductIds = validProducts.filter(product =>
-    !product.stock.some(stockItem => shopifyProductIds.includes(stockItem.inventoryItemId))
+    !product.stock.some(stockItem => shopifyProductIds.has(stockItem.inventoryItemId))
 );
 
 console.log('this is the verified products', verifiedProducts);
