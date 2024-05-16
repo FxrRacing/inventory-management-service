@@ -28,6 +28,7 @@ router.get('/inventory/:store', async (request, env) => {
     const { store } = request.params;
     const url = new URL(request.url);
     const limit = parseInt(url.searchParams.get('limit') ?? '50', 10);
+    const all:boolean = url.searchParams.get('all') === 'true';
     const options: R2ListOptions = {
         limit: limit,
         prefix: store ?? undefined,
@@ -39,6 +40,7 @@ router.get('/inventory/:store', async (request, env) => {
    //🍀💻🔥
    
     const listing = await env.MY_BUCKET.list(options);
+   if(all){
     let truncated = listing.truncated
     let cursor = truncated ? listing.cursor : undefined
 
@@ -48,6 +50,12 @@ router.get('/inventory/:store', async (request, env) => {
         truncated = next.truncated;
         cursor  = next.cursor;
     }
+    listing.objects.sort((a, b) => new Date(b.uploaded as string).getTime() - new Date(a.uploaded as string).getTime());
+
+    return new Response(JSON.stringify(listing), {headers: {
+        'content-type': 'application/json; charset=UTF-8', 
+      }})
+   }
     listing.objects.sort((a, b) => new Date(b.uploaded as string).getTime() - new Date(a.uploaded as string).getTime());
 
     return new Response(JSON.stringify(listing), {headers: {
