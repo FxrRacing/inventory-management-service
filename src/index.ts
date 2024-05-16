@@ -39,7 +39,17 @@ router.get('/inventory/:store', async (request, env) => {
    //🍀💻🔥
    
     const listing = await env.MY_BUCKET.list(options);
-    
+    let truncated = listing.truncated
+    let cursor = truncated ? listing.cursor : undefined
+
+    while(truncated) {
+        const next = await env.MY_BUCKET.list({ ...options, cursor })
+        listing.objects.push(...next.objects)
+        truncated = next.truncated;
+        cursor  = next.cursor;
+    }
+    listing.objects.sort((a, b) => new Date(b.uploaded as string).getTime() - new Date(a.uploaded as string).getTime());
+
     return new Response(JSON.stringify(listing), {headers: {
         'content-type': 'application/json; charset=UTF-8', 
       }})
@@ -191,7 +201,7 @@ async function processDataForPriceCorrectionJsonL(request: Request, postedData: 
             urlReferences: `https://${storeContext.storeUrl}${product.stock.map(stockItem => stockItem.historyUrl)}/inventory_history`
         }));
         const jsonl = serializeToJsonL(quantitiesArray);
-        const processCount = processedData.valid;
+        const processCount = processedData.valid.length;
        
         const invalidCount = processedData.invalid.length;
 
