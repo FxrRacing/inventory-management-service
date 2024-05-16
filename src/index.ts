@@ -6,8 +6,8 @@ import { BulkOperationResponse, Env, InventoryAdjustment } from './interfaces';
 import { authorizeRequest } from './authentication/auth';
 import { StoreInitializer, getStoreDetails } from './handlers/storeDetails';
 import { Router, error, json} from 'itty-router';
-import { UpdateInventoryQuantities } from "./transformers/updateInventory";
-import { hi, id } from "date-fns/locale";
+import { StoreDetails, UpdateInventoryQuantities } from "./transformers/updateInventory";
+
 
 import moment from "moment";
 
@@ -39,7 +39,17 @@ router.get('/inventory/:store', async (request, env) => {
    //🍀💻🔥
    
     const listing = await env.MY_BUCKET.list(options);
-    
+    let truncated = listing.truncated
+    let cursor = truncated ? listing.cursor : undefined
+
+    while(truncated) {
+        const next = await env.MY_BUCKET.list({ ...options, cursor })
+        listing.objects.push(...next.objects)
+        truncated = next.truncated;
+        cursor  = next.cursor;
+    }
+    listing.objects.sort((a, b) => new Date(b.uploaded as string).getTime() - new Date(a.uploaded as string).getTime());
+
     return new Response(JSON.stringify(listing), {headers: {
         'content-type': 'application/json; charset=UTF-8', 
       }})
@@ -86,9 +96,9 @@ router.post('/inventory/:region', async (request, env) => {
 
     try {
         const postedData = await request.json() as any[];
-    
-        const { processCount, invalidCount, jsonl, historyRef } = await processDataForPriceCorrectionJsonL(request, postedData, storeContext.storeUrl);
-
+        
+        const { processCount, invalidCount, jsonl, historyRef } = await processDataForPriceCorrectionJsonL(request, postedData, storeContext);
+       //console.log('jsonl', jsonl);
         const fileUploadName = 'bulk_op_vars'
         const inventoryUpdate = new UpdateInventoryQuantities(storeContext, fileUploadName);
      
@@ -157,13 +167,13 @@ async function sendBulkMutationToShopify(inventoryUpdate: UpdateInventoryQuantit
 }
 
 
-async function processDataForPriceCorrectionJsonL(request: Request, postedData: any[], storeUrl: string) {
+async function processDataForPriceCorrectionJsonL(request: Request, postedData: any[], storeContext: StoreDetails) {
 
     if (!Array.isArray(postedData)) {
         throw new Error("Posted data must be an array");
     }
     try {
-        const processedData = await validateAndTransformData(postedData);
+        const processedData = await validateAndTransformData(postedData, storeContext);
 
         const quantitiesArray = processedData.valid.map(product => {
             const productQuantities = product.stock.map(stockItem => ({
@@ -171,6 +181,9 @@ async function processDataForPriceCorrectionJsonL(request: Request, postedData: 
                 inventoryItemId: stockItem.inventoryItemId,
                 quantity: stockItem.available
             }));
+
+            
+            //add compare here
 
           
             return new Quantities('correction', productQuantities);
@@ -184,11 +197,12 @@ async function processDataForPriceCorrectionJsonL(request: Request, postedData: 
             displayName: product.displayName,
             productID: product.ShopifyProductId,
             variantID: product.ShopifyVariantId,
-            variantUrl: `https://${storeUrl}.myshopify.com/admin/products/${product.ShopifyProductId}/variants/${product.ShopifyVariantId}`,// ` https://${storeUrl}.myshopify.com/admin/products/${product.ShopifyProductId}/variants/${product.ShopifyVariantId}`
-            urlReferences: `https://${storeUrl}${product.stock.map(stockItem => stockItem.historyUrl)}/inventory_history`
+            variantUrl: `https://${storeContext.storeUrl}.myshopify.com/admin/products/${product.ShopifyProductId}/variants/${product.ShopifyVariantId}`,// ` https://${storeUrl}.myshopify.com/admin/products/${product.ShopifyProductId}/variants/${product.ShopifyVariantId}`
+            urlReferences: `https://${storeContext.storeUrl}${product.stock.map(stockItem => stockItem.historyUrl)}/inventory_history`
         }));
         const jsonl = serializeToJsonL(quantitiesArray);
         const processCount = processedData.valid.length;
+       
         const invalidCount = processedData.invalid.length;
 
 
@@ -198,6 +212,9 @@ async function processDataForPriceCorrectionJsonL(request: Request, postedData: 
         throw new Error("Error processing data");
     }
 }
+
+
+
 
 
 
