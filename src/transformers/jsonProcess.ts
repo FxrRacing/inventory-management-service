@@ -88,7 +88,7 @@ export async function validateAndTransformData(
         }`;
 
     const shopifyData = await fetchGraphQl(inventoryQuery, storeContext);
-    console.log('this is the shopify data', shopifyData);
+    //console.log('this is the shopify data', shopifyData);
     const shopifyProductIds = new Set(
         Object.values(shopifyData.data)
             .filter(item => item !== null)
@@ -104,7 +104,7 @@ const invalidProductIds = validProducts.filter(product =>
     !product.stock.some(stockItem => shopifyProductIds.has(stockItem.inventoryItemId))
 );
 
-console.log('this is the verified products', verifiedProducts);
+//console.log('this is the verified products', verifiedProducts);
 
     return { valid: verifiedProducts, invalid: [...invalidProducts, ...invalidProductIds] };
 }

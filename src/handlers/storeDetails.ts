@@ -12,7 +12,7 @@ function sanitizeString(str: string): string {
 export function getStoreDetails(request: Request, env: Env, fallBackStore: string): StoreDetails{
 
     const storeName = sanitizeString(request.headers.get('x-store-name') || fallBackStore).toUpperCase();
-    console.log('this is the store that is sanitized: ' + storeName, 'this is the fallback store: ' + fallBackStore)
+    //console.log('this is the store that is sanitized: ' + storeName, 'this is the fallback store: ' + fallBackStore)
     const storeConfigMap: Record<string, StoreConfig> = {
         'US': {
             storeUrl: env.STR_US_API_URL,
@@ -134,3 +134,10 @@ export class StoreInitializer {
         return this.storeContext;
     }
 }
+
+
+
+
+/**
+ *can i type for about 10 minsu
+ */
