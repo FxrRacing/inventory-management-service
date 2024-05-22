@@ -31,6 +31,7 @@ export interface Env {
 	STR_SASK_API_KEY: string;
 	STR_NO_API_URL: string;
 	STR_NO_API_KEY: string;
+	TEAMS_URL: string;
 	/** Sentry DSN */
 	SENTRY_DSN: string;
 	MY_BUCKET: R2Bucket;

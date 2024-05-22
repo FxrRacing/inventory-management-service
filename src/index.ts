@@ -10,6 +10,8 @@ import { UpdateInventoryQuantities } from "./transformers/updateInventory";
 import { hi, id } from "date-fns/locale";
 
 import moment from "moment";
+import { createCard, notifyTeams } from "./utils";
+import { notify } from "../jest.config";
 
 
 
@@ -77,7 +79,7 @@ router.post('/inventory/:region', async (request, env) => {
 	try {
         const postedData = await request.json() as any[]; 
 		console.log('Processing data for region:', region); 
-       const  { processCount, invalidCount, jsonl,  historyRef } = await processDataForPriceCorrectionJsonL(request, postedData, storeContext.storeUrl);
+       const  { processCount, invalidCount, jsonl,  historyRef } = await processDataForPriceCorrectionJsonL(request, postedData, storeContext.storeUrl, env);
 		
 		const fileUploadName= 'bulk_op_vars'
 		const inventoryUpdate = new UpdateInventoryQuantities(storeContext, fileUploadName);
@@ -136,7 +138,7 @@ async function sendBulkMutationToShopify( inventoryUpdate: UpdateInventoryQuanti
 }
 
 
-async function processDataForPriceCorrectionJsonL( request: Request, postedData: any[], storeUrl: string){
+async function processDataForPriceCorrectionJsonL( request: Request, postedData: any[], storeUrl: string, env: Env){
 	
 	if (!Array.isArray(postedData)) {
         throw new Error("Posted data must be an array"); 
@@ -165,8 +167,12 @@ async function processDataForPriceCorrectionJsonL( request: Request, postedData:
         const jsonl = serializeToJsonL(quantitiesArray);
         const processCount = processedData.valid.length;
         const invalidCount = processedData.invalid.length;
-
-		
+        const errFileName= `${storeUrl}-inventory-error-${normalTime()}.json`
+        const uploadErrorData = await storeErrorData(env, errFileName, processedData.invalid);
+        const buildCard = createCard(`${invalidCount} product(s) failed validation, view the products here`,storeUrl,errFileName);
+        const teamsNotification  = await notifyTeams(JSON.stringify(buildCard), env);
+        console.log('Teams notification:', teamsNotification);
+		console.log('Error data upload status:', uploadErrorData);
         return { processCount, invalidCount, jsonl, historyRef };
     } catch (error) {
 		console.error('Error:', error); 
@@ -174,6 +180,28 @@ async function processDataForPriceCorrectionJsonL( request: Request, postedData:
     }
 }
 
+async function storeErrorData( env: Env, errFileName: string, errorData: any): Promise<string>{
+    const object= await env.MY_BUCKET.put(errFileName, JSON.stringify(errorData))
+    if (object) {
+        return 'Error data stored';
+    }
+    return 'Error storing data';
+   
+   
+
+}
+
+function normalTime(){
+    const current = new Date();
+    const day = current.getDate();
+    const month = current.getMonth();
+    const year = current.getFullYear();
+    const hour = current.getHours();
+    const minute = current.getMinutes();
+    const second = current.getSeconds();
+    const time = `${day}-${month}-${year}T${hour}-${minute}-${second}`;
+    return time;
+}
 
 //TODO: Continue to make the mutation to shopify 
 
