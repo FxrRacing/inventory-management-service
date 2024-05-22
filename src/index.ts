@@ -53,14 +53,14 @@ router.get('/inventory/:store', async (request, env) => {
         truncated = next.truncated;
         cursor  = next.cursor;
     }
-    listing.objects.sort((a, b) => new Date(b.uploaded as string).getTime() - new Date(a.uploaded as string).getTime());
+    listing.objects.sort((a, b) => new Date(b.uploaded).getTime() - new Date(a.uploaded).getTime());
 
     return new Response(JSON.stringify(listing), {headers: {
         'content-type': 'application/json; charset=UTF-8', 
         'cursor': cursor,
       }})
    }
-    const hope =  listing.objects.sort((a, b) => new Date(b.uploaded as string).getTime() - new Date(a.uploaded as string).getTime());
+    const hope =  listing.objects.sort((a, b) => new Date(b.uploaded).getTime() - new Date(a.uploaded).getTime());
 
     return new Response(JSON.stringify(hope), {headers: {
         'content-type': 'application/json; charset=UTF-8', 
