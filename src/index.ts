@@ -42,7 +42,7 @@ router.get('/inventory/:store', async (request, env) => {
    //🍀💻🔥
    
     const listing = await env.MY_BUCKET.list();
-    console.log('this is the value of all', all)
+    //console.log('this is the value of all', all)
    if(all){
     let truncated = listing.truncated
     let cursor = truncated ? listing.cursor : undefined
