@@ -25,12 +25,14 @@ router.get('/hi',async (request, env) => {
 });
 
 router.get('/inventory/:store', async (request, env) => {
+    console.log('visited')
     const { store } = request.params;
     const url = new URL(request.url);
-    const limit = parseInt(url.searchParams.get('limit') ?? '50', 10);
+    const limit = parseInt(url.searchParams.get('limit') ?? '600', 10);
     const all:boolean = url.searchParams.get('all') === 'true';
+    
     const options: R2ListOptions = {
-        limit: limit,
+        limit: limit?? undefined,
         prefix: store ?? undefined,
         delimiter: url.searchParams.get('delimiter') ?? undefined,
         cursor: url.searchParams.get('cursor') ?? undefined,
@@ -39,7 +41,8 @@ router.get('/inventory/:store', async (request, env) => {
    
    //🍀💻🔥
    
-    const listing = await env.MY_BUCKET.list(options);
+    const listing = await env.MY_BUCKET.list();
+    console.log('this is the value of all', all)
    if(all){
     let truncated = listing.truncated
     let cursor = truncated ? listing.cursor : undefined
@@ -54,11 +57,12 @@ router.get('/inventory/:store', async (request, env) => {
 
     return new Response(JSON.stringify(listing), {headers: {
         'content-type': 'application/json; charset=UTF-8', 
+        'cursor': cursor,
       }})
    }
-    listing.objects.sort((a, b) => new Date(b.uploaded as string).getTime() - new Date(a.uploaded as string).getTime());
+    const hope =  listing.objects.sort((a, b) => new Date(b.uploaded as string).getTime() - new Date(a.uploaded as string).getTime());
 
-    return new Response(JSON.stringify(listing), {headers: {
+    return new Response(JSON.stringify(hope), {headers: {
         'content-type': 'application/json; charset=UTF-8', 
       }})
 });
