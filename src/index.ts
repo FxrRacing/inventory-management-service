@@ -16,6 +16,7 @@ import moment from "moment";
 
 
 
+
 const router = Router();
 
 router.get('/', () => new Response('Hello worker!'));
@@ -23,6 +24,53 @@ router.get('/hi',async (request, env) => {
     const currentTime = moment().format('DD-MM-YYYYTHH-mm-ss');
     return new Response(`Hello worker! ${currentTime}`);
 });
+router.get('/inventory/records/:store', async (request, env) => {
+    console.log('visited');
+    const { store } = request.params;
+    let combinedRecords :any[] =[]
+    const formatDate= (date: Date) => {
+        const year = date.getFullYear();
+        const month = (1 + date.getMonth()).toString().padStart(2, '0');
+        const day = date.getDate().toString().padStart(2, '0');
+        return `${day}-${month}`;
+        
+    }
+    const today = new Date();
+    const yesterday = new Date(today);
+    yesterday.setDate(yesterday.getDate() - 1);
+    const dayBeforeYesterday = new Date(today);
+    dayBeforeYesterday.setDate(dayBeforeYesterday.getDate() - 2);
+
+    const dates = [today, yesterday, dayBeforeYesterday];
+
+    for(const date of dates){
+        console.log('Date:', date);
+        const datePrefix = formatDate(date);
+        const params= {prefix: `${store}-inventory-update-${datePrefix}`,include: ['customMetadata', 'httpMetadata'],};
+        const listing = await env.MY_BUCKET.list(params);
+        combinedRecords = combinedRecords.concat(listing.objects);
+       
+    }
+
+    if(!combinedRecords.length){
+        return new Response(JSON.stringify({ error: 'No records found' }), {
+            headers: { 'content-type': 'application/json; charset=UTF-8' }
+        });
+    }
+    console.log('Dates before sorting:', combinedRecords.map(record => record.uploaded).slice(0, 5));
+    const sortedRecords = combinedRecords.sort((a, b) => new Date(b.uploaded).getTime() - new Date(a.uploaded).getTime());
+    console.log('Dates after sorting:', sortedRecords.map(record => record.uploaded).slice(0, 5));
+    const responseObject = {
+        objects: sortedRecords,
+        truncated: true,
+        cursor: null
+    }
+
+    return new Response(JSON.stringify(responseObject), {headers: { 'content-type': 'application/json; charset=UTF-8' }});
+});
+
+
+
 
 router.get('/inventory/:store', async (request, env) => {
     console.log('visited')
@@ -54,14 +102,14 @@ router.get('/inventory/:store', async (request, env) => {
 
             
         }
-        listing.objects.sort((a, b) => new Date(b.uploaded).getTime() - new Date(a.uploaded).getTime());
+        listing.objects.sort((a: { uploaded: string | number | Date; }, b: { uploaded: string | number | Date; }) => new Date(b.uploaded).getTime() - new Date(a.uploaded).getTime());
         return new Response(JSON.stringify(listing), {headers: {
             'content-type': 'application/json; charset=UTF-8', 
             'cursor': cursor,
           }})
     }
-    allListing = allListing.filter(obj => obj.uploaded)
-    allListing.sort((a, b) => new Date(b.uploaded).getTime() - new Date(a.uploaded).getTime());
+    allListing = allListing.filter((obj: { uploaded: any; }) => obj.uploaded)
+    allListing.sort((a: { uploaded: string | number | Date; }, b: { uploaded: string | number | Date; }) => new Date(b.uploaded).getTime() - new Date(a.uploaded).getTime());
 
     const limitedObjects = limit? allListing.splice(0, limit) : allListing;
 
@@ -98,15 +146,6 @@ router.get('/inventory/:store', async (request, env) => {
 //    }
 
 
-
-   console.log('Before sorting:', listing.objects.map(obj => obj.uploaded)); 
-   listing.objects = listing.objects.filter((obj) => obj.uploaded).sort((a, b) => new Date(b.uploaded).getTime() - new Date(a.uploaded).getTime());
-   console.log('After sorting:', listing.objects.map(obj => obj.uploaded));
-
-
-    return new Response(JSON.stringify(listing), {headers: {
-        'content-type': 'application/json; charset=UTF-8', 
-      }})
 });
 
 
