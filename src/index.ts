@@ -28,41 +28,83 @@ router.get('/inventory/:store', async (request, env) => {
     console.log('visited')
     const { store } = request.params;
     const url = new URL(request.url);
-    const limit = parseInt(url.searchParams.get('limit') ?? '600', 10);
-    const all:boolean = url.searchParams.get('all') === 'true';
+    const limit = parseInt(url.searchParams.get('limit') ?? '500', 10);
+    const pageMax = 5;
+   
     
     const options: R2ListOptions = {
-        limit: limit?? undefined,
         prefix: store ?? undefined,
         delimiter: url.searchParams.get('delimiter') ?? undefined,
         cursor: url.searchParams.get('cursor') ?? undefined,
         include: ['customMetadata', 'httpMetadata'],
       }
-   
-   //🍀💻🔥
-   
-    const listing = await env.MY_BUCKET.list();
-    //console.log('this is the value of all', all)
-   if(all){
-    let truncated = listing.truncated
-    let cursor = truncated ? listing.cursor : undefined
+  
+    const listing = await env.MY_BUCKET.list(options);
+    let allListing= []
+    let viewedPages = 0;
+    const cursor = listing.cursor;
+    allListing = listing.objects;
+    if (limit > 1000){
+        while(listing.truncated && viewedPages < pageMax){
+            const next = await env.MY_BUCKET.list({ ...options, cursor });
+            listing.objects.push(...next.objects);
+            listing.truncated = next.truncated;
+            listing.cursor = next.cursor;
+            viewedPages++;
 
-    while(truncated) {
-        const next = await env.MY_BUCKET.list({ ...options, cursor })
-        listing.objects.push(...next.objects)
-        truncated = next.truncated;
-        cursor  = next.cursor;
+            
+        }
+        listing.objects.sort((a, b) => new Date(b.uploaded).getTime() - new Date(a.uploaded).getTime());
+        return new Response(JSON.stringify(listing), {headers: {
+            'content-type': 'application/json; charset=UTF-8', 
+            'cursor': cursor,
+          }})
     }
-    listing.objects.sort((a, b) => new Date(b.uploaded).getTime() - new Date(a.uploaded).getTime());
+    allListing = allListing.filter(obj => obj.uploaded)
+    allListing.sort((a, b) => new Date(b.uploaded).getTime() - new Date(a.uploaded).getTime());
 
-    return new Response(JSON.stringify(listing), {headers: {
+    const limitedObjects = limit? allListing.splice(0, limit) : allListing;
+
+    const newListed= {
+        objects: limitedObjects,
+        truncated: listing.truncated,
+        cursor: listing.cursor? listing.cursor : null
+    }
+    return new Response(JSON.stringify(newListed), {headers: {
         'content-type': 'application/json; charset=UTF-8', 
         'cursor': cursor,
       }})
-   }
-    const hope =  listing.objects.sort((a, b) => new Date(b.uploaded).getTime() - new Date(a.uploaded).getTime());
 
-    return new Response(JSON.stringify(hope), {headers: {
+
+
+    
+
+//    if(all){
+//     let truncated = listing.truncated
+//     let cursor = truncated ? listing.cursor : undefined
+
+//     while(truncated) {
+//         const next = await env.MY_BUCKET.list({ ...options, cursor })
+//         listing.objects.push(...next.objects)
+//         truncated = next.truncated;
+//         cursor  = next.cursor;
+//     }
+//     listing.objects.sort((a, b) => new Date(b.uploaded).getTime() - new Date(a.uploaded).getTime());
+
+//     return new Response(JSON.stringify(listing), {headers: {
+//         'content-type': 'application/json; charset=UTF-8', 
+//         'cursor': cursor,
+//       }})
+//    }
+
+
+
+   console.log('Before sorting:', listing.objects.map(obj => obj.uploaded)); 
+   listing.objects = listing.objects.filter((obj) => obj.uploaded).sort((a, b) => new Date(b.uploaded).getTime() - new Date(a.uploaded).getTime());
+   console.log('After sorting:', listing.objects.map(obj => obj.uploaded));
+
+
+    return new Response(JSON.stringify(listing), {headers: {
         'content-type': 'application/json; charset=UTF-8', 
       }})
 });
